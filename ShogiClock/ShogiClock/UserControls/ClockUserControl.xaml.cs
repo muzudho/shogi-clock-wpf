@@ -52,13 +52,15 @@ namespace ShogiClock.UserControls
                         viewModel.FirstPlayerText = $"{csaFile.RemainingTime[1] / 60}分{csaFile.RemainingTime[1] % 60}秒";
                         viewModel.SecondPlayerText = $"{csaFile.RemainingTime[2] / 60}分{csaFile.RemainingTime[2] % 60}秒";
 
-                        if (csaFile.EndTime != null)
+                        if (0 < csaFile.EndTime.Ticks)
                         {
-                            viewModel.StatusText = DateTime.Now.ToString("対局終了。自動更新おわり (最終更新 yyyy/MM/dd HH:mm:ss)");
+                            viewModel.StatusText = $"{csaFile.EndTime.ToString("yyyy/MM/dd HH:mm:ss")}に対局終了。自動更新おわり  (最終更新 {DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")})";
+                            this.tournamentComboBox.IsEnabled = true;
                             this.monitorButton.IsEnabled = true;
+                            this.intervalSeconds.IsEnabled = true;
                             return true;
                         }
-                        viewModel.StatusText = DateTime.Now.ToString("稼働中 (最終更新 yyyy/MM/dd HH:mm:ss)");
+                        viewModel.StatusText = DateTime.Now.ToString("自動更新中 (最終更新 yyyy/MM/dd HH:mm:ss)");
                         return false;
                     })).Result;
                     if (finished)
@@ -77,7 +79,9 @@ namespace ShogiClock.UserControls
                         viewModel.FirstPlayerText = $"先手----";
                         viewModel.SecondPlayerText = $"後手----";
                         viewModel.StatusText = DateTime.Now.ToString("棋譜を読み込めていません。自動更新おわり (最終更新 yyyy/MM/dd HH:mm:ss)");
+                        this.tournamentComboBox.IsEnabled = true;
                         this.monitorButton.IsEnabled = true;
+                        this.intervalSeconds.IsEnabled = true;
                     })).Wait();
                     break;
                 }
@@ -91,6 +95,8 @@ namespace ShogiClock.UserControls
             //{
             //    // 単に終了します
             //}
+
+            // Console.WriteLine("ワーカースレッド終了");
         }
 
         /// <summary>
@@ -100,7 +106,9 @@ namespace ShogiClock.UserControls
         /// <param name="e"></param>
         private void MonitorButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            this.tournamentComboBox.IsEnabled = false;
             this.monitorButton.IsEnabled = false;
+            this.intervalSeconds.IsEnabled = false;
 
             // このコードブロックはUIスレッド。UIにアクセスできますが、処理は早く終わらなければいけません
             var viewModel = this.DataContext as ClockViewModel;

@@ -176,7 +176,7 @@ namespace ShogiClock.Models
             int i = 0;
             foreach (var line in csaText.Split(new string[] { newLine }, StringSplitOptions.None))
             {
-                Console.WriteLine($"line: {line}");
+                // Console.WriteLine($"line: {line}");
                 Match matched;
 
                 if (i == 0)
