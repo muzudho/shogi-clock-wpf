@@ -47,40 +47,40 @@ namespace ShogiClock.UserControls
         private void MonitoringThread()
         {
             // このコードブロックは ワーカー スレッド。UIにはアクセスできません
-            try
+            //try
+            //{
+            // TODO ループ
+            for (; ; )
             {
-                // TODO ループ
-                for (; ; )
+                // UIから URL取得
+                // Example: https://golan.sakura.ne.jp/denryusen/dr2_tsec/kifufiles/dr2tsec+buoy_james8nakahi_dr2b3-11-bottom_43_dlshogi_xylty-60-2F+dlshogi+xylty+20210718131042.csa
+                (string url, string tournament, int intervalSeconds) = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
                 {
-                    // UIから URL取得
-                    // Example: https://golan.sakura.ne.jp/denryusen/dr2_tsec/kifufiles/dr2tsec+buoy_james8nakahi_dr2b3-11-bottom_43_dlshogi_xylty-60-2F+dlshogi+xylty+20210718131042.csa
-                    (string url, string tournament, int intervalSeconds) = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
-                    {
                         // このコードブロックは UIスレッド。UIを更新できます
                         var viewModel = this.DataContext as ClockViewModel;
-                        return (viewModel.UrlText, viewModel.Tournament.CurrentItem as string, viewModel.IntervalSeconds);
-                    })).Result;
+                    return (viewModel.UrlText, viewModel.Tournament.CurrentItem as string, viewModel.IntervalSeconds);
+                })).Result;
 
-                    // CSAファイル読取
-                    var csaFile = CsaFile.Load(tournament, url);
+                // CSAファイル読取
+                var csaFile = CsaFile.Load(tournament, url);
 
-                    // すぐ終わる処理
-                    Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
-                    {
+                // すぐ終わる処理
+                Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                {
                         // このコードブロックは UIスレッド。UIを更新できます
                         var viewModel = this.DataContext as ClockViewModel;
-                        viewModel.FirstPlayerText = $"{csaFile.RemainingTime[1] / 60}分{csaFile.RemainingTime[1] % 60}秒";
-                        viewModel.SecondPlayerText = $"{csaFile.RemainingTime[2] / 60}分{csaFile.RemainingTime[2] % 60}秒";
-                    }));
+                    viewModel.FirstPlayerText = $"{csaFile.RemainingTime[1] / 60}分{csaFile.RemainingTime[1] % 60}秒";
+                    viewModel.SecondPlayerText = $"{csaFile.RemainingTime[2] / 60}分{csaFile.RemainingTime[2] % 60}秒";
+                }));
 
-                    // 更新間隔（秒）
-                    Thread.Sleep(intervalSeconds * 1000);
-                }
+                // 更新間隔（秒）
+                Thread.Sleep(intervalSeconds * 1000);
             }
-            catch (TaskCanceledException)
-            {
-                // 単に終了します
-            }
+            //}
+            //catch (TaskCanceledException)
+            //{
+            //    // 単に終了します
+            //}
         }
     }
 }

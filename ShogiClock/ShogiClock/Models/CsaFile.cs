@@ -16,7 +16,7 @@ namespace ShogiClock.Models
         /// <summary>
         /// CSA形式の棋譜のバージョン
         /// </summary>
-        private static readonly Regex _reVersion = new Regex(@"^(V[\d\.]+)$");
+        private static readonly Regex _reVersion = new Regex(@"^(V[\d\.]+)$", RegexOptions.Compiled);
 
         /// <summary>
         /// 持ち時間（秒）
@@ -24,42 +24,42 @@ namespace ShogiClock.Models
         /// また - _ の取り扱いが不確かなので、うしろからパースすること。
         /// </summary>
         /// <example>$EVENT:dr2tsec+buoy_james8nakahi_dr2b3-11-bottom_43_dlshogi_xylty-60-2F+dlshogi+xylty+20210718131042</example>
-        private static readonly Regex _reDenryuSenTimeLimit = new Regex(@"^\$EVENT:.+-(\d+)-\d+F\+[0-9A-Za-z_-]+\+[0-9A-Za-z_-]+\+\d{14}$");
+        private static readonly Regex _reDenryuSenTimeLimit = new Regex(@"^\$EVENT:.+-(\d+)-\d+F\+[0-9A-Za-z_-]+\+[0-9A-Za-z_-]+\+\d{14}$", RegexOptions.Compiled);
 
         /// <summary>
         /// floodgate
         /// </summary>
-        private static readonly Regex _reFloodgateTimeLimit = new Regex(@"^\$EVENT:wdoor\+floodgate-(\d+)-\d+F\+.+$");
+        private static readonly Regex _reFloodgateTimeLimit = new Regex(@"^\$EVENT:wdoor\+floodgate-(\d+)-\d+F\+.+$", RegexOptions.Compiled);
 
         /// <summary>
         /// 手番。1が先手、2が後手。配列の添え字に使う
         /// </summary>
         /// <example>+2726FU</example>
-        private static readonly Regex _rePhase = new Regex(@"^([+-])\d{4}\w{2}$");
+        private static readonly Regex _rePhase = new Regex(@"^([+-])\d{4}\w{2}$", RegexOptions.Compiled);
 
         /// <summary>
         /// 開始時間
         /// </summary>
         /// <example>$START_TIME:2021/07/18 13:10:42</example>
-        private static readonly Regex _reStartTime = new Regex(@"^\$START_TIME:(\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})$");
+        private static readonly Regex _reStartTime = new Regex(@"^\$START_TIME:(\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})$", RegexOptions.Compiled);
 
         /// <summary>
         /// 加算時間
         /// </summary>
         /// <example>'Increment:2</example>
-        private static readonly Regex _reIncrement = new Regex(@"^'Increment:(\d+)$");
+        private static readonly Regex _reIncrement = new Regex(@"^'Increment:(\d+)$", RegexOptions.Compiled);
 
         /// <summary>
         /// 消費時間
         /// </summary>
         /// <example>T2</example>
-        private static readonly Regex _reErapsed = new Regex(@"^T(\d+)$");
+        private static readonly Regex _reErapsed = new Regex(@"^T(\d+)$", RegexOptions.Compiled);
 
         /// <summary>
         /// 終了時間
         /// </summary>
         /// <example>'$END_TIME:2021/08/10 21:14:45</example>
-        private static readonly Regex _reEndTime = new Regex(@"^'\$END_TIME:(\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})$");
+        private static readonly Regex _reEndTime = new Regex(@"^'\$END_TIME:(\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})$", RegexOptions.Compiled);
 
         /// <summary>
         /// CSA形式の棋譜を指すURL
@@ -166,25 +166,27 @@ namespace ShogiClock.Models
             int i = 0;
             foreach (var line in csaText.Split(new string[] { newLine }, StringSplitOptions.None))
             {
+                Console.WriteLine($"line: {line}");
+                Match matched;
+
                 if (i == 0)
                 {
-                    var result = CsaFile._reVersion.Match(line);
-                    if (result.Success)
+                    matched = CsaFile._reVersion.Match(line);
+                    if (matched.Success)
                     {
                         // OK, pass
                     }
                     else
                     {
                         // Error
-                        throw new Exception($"It\'s not a CSA file. Expected: \"V2\", etc. Found: \"{line}\"");
+                        throw new Exception($"It\'s not a CSA file. Expected: V2, etc. Found: {line}");
                     }
                 }
 
-                var groups = CsaFile._rePhase.Matches(line);
-                if (1 < groups.Count)
+                matched = CsaFile._rePhase.Match(line);
+                if (matched.Success)
                 {
-                    // print(f"Phase {result.group(1)}")
-                    string sign = groups[1].Value;
+                    string sign = matched.Groups[1].Value;
                     if (sign == "+")
                     {
                         csaFile.Phase = 1;
@@ -203,72 +205,72 @@ namespace ShogiClock.Models
                     continue;
                 }
 
-                groups = CsaFile._reErapsed.Matches(line);
-                if (1 < groups.Count)
+                matched = CsaFile._reErapsed.Match(line);
+                if (matched.Success)
                 {
                     // print(f"Erapsed {result.group(1)}")
-                    csaFile.Erapsed[csaFile.Phase] += int.Parse(groups[1].Value);
+                    csaFile.Erapsed[csaFile.Phase] += int.Parse(matched.Groups[1].Value);
                     continue;
                 }
 
                 if (tournament == "floodgate")
                 {
                     // floodgate用
-                    groups = CsaFile._reFloodgateTimeLimit.Matches(line);
-                    if (1 < groups.Count)
+                    matched = CsaFile._reFloodgateTimeLimit.Match(line);
+                    if (matched.Success)
                     {
-                        // print(f"TimeLimit Sec={result.group(1)}")
                         // 先手と後手の持ち時間は同じ
-                        csaFile.TimeLimit = new int[3] { 0, int.Parse(groups[1].Value), int.Parse(groups[1].Value) };
+                        var seconds = int.Parse(matched.Groups[1].Value);
+                        csaFile.TimeLimit = new int[3] { 0, seconds, seconds };
                         continue;
                     }
                 }
                 else
                 {
                     // 電竜戦、その他用
-                    groups = CsaFile._reDenryuSenTimeLimit.Matches(line);
-                    if (1 < groups.Count)
+                    matched = CsaFile._reDenryuSenTimeLimit.Match(line);
+                    if (matched.Success)
                     {
                         // print(f"TimeLimit Sec={result.group(1)}")
                         // 先手と後手の持ち時間は同じ
-                        csaFile.TimeLimit = new int[3] { 0, int.Parse(groups[1].Value), int.Parse(groups[1].Value) };
+                        var seconds = int.Parse(matched.Groups[1].Value);
+                        csaFile.TimeLimit = new int[3] { 0, seconds, seconds };
                         continue;
                     }
                 }
 
-                groups = CsaFile._reStartTime.Matches(line);
-                if (1 < groups.Count)
+                matched = CsaFile._reStartTime.Match(line);
+                if (matched.Success)
                 {
-                    // print(f"StartTime [1]={result.group(1)} [2]={result.group(2)} [3]={result.group(3)} [4]={result.group(4)} [5]={result.group(5)} [6]={result.group(6)}")
                     csaFile.StartTime = new DateTime(
-                        int.Parse(groups[1].Value),
-                        int.Parse(groups[2].Value),
-                        int.Parse(groups[3].Value),
-                        int.Parse(groups[4].Value),
-                        int.Parse(groups[5].Value),
-                        int.Parse(groups[6].Value));
+                        int.Parse(matched.Groups[1].Value),
+                        int.Parse(matched.Groups[2].Value),
+                        int.Parse(matched.Groups[3].Value),
+                        int.Parse(matched.Groups[4].Value),
+                        int.Parse(matched.Groups[5].Value),
+                        int.Parse(matched.Groups[6].Value)
+                        );
                     continue;
                 }
 
-                groups = CsaFile._reEndTime.Matches(line);
-                if (1 < groups.Count)
+                matched = CsaFile._reEndTime.Match(line);
+                if (matched.Success)
                 {
-                    // print(f"EndTime [1]={result.group(1)} [2]={result.group(2)} [3]={result.group(3)} [4]={result.group(4)} [5]={result.group(5)} [6]={result.group(6)}")
                     csaFile.EndTime = new DateTime(
-                        int.Parse(groups[1].Value),
-                        int.Parse(groups[2].Value),
-                        int.Parse(groups[3].Value),
-                        int.Parse(groups[4].Value),
-                        int.Parse(groups[5].Value),
-                        int.Parse(groups[6].Value));
+                        int.Parse(matched.Groups[1].Value),
+                        int.Parse(matched.Groups[2].Value),
+                        int.Parse(matched.Groups[3].Value),
+                        int.Parse(matched.Groups[4].Value),
+                        int.Parse(matched.Groups[5].Value),
+                        int.Parse(matched.Groups[6].Value)
+                        );
                     continue;
                 }
 
-                groups = CsaFile._reIncrement.Matches(line);
-                if (1 < groups.Count)
+                matched = CsaFile._reIncrement.Match(line);
+                if (matched.Success)
                 {
-                    // print(f"Increment {result.group(1)}")
-                    csaFile.Increment = int.Parse(groups[1].Value);
+                    csaFile.Increment = int.Parse(matched.Groups[1].Value);
                     continue;
                 }
 
