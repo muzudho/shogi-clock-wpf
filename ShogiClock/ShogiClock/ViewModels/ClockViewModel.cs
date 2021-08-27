@@ -29,6 +29,28 @@ namespace ShogiClock.ViewModels
             }
         }
 
+        private int _intervalSeconds = 60;
+
+        /// <summary>
+        /// 棋譜を読みに行く間隔（秒）
+        /// </summary>
+        public int IntervalSeconds
+        {
+            get
+            {
+                return this._intervalSeconds;
+            }
+            set
+            {
+                if (this._intervalSeconds == value)
+                {
+                    return;
+                }
+                this._intervalSeconds = value;
+                RaisePropertyChanged("IntervalSeconds");
+            }
+        }
+
         private string _firstPlayerText = string.Empty;
 
         /// <summary>

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Net;
 
 namespace ShogiClock.UserControls
 {
@@ -45,41 +46,43 @@ namespace ShogiClock.UserControls
         private void MonitoringThread()
         {
             // このコードブロックは ワーカー スレッド。UIにはアクセスできません
-
-            // TODO ループ
-            // 時間のかかる処理
-            for (; ; )
+            try
             {
-                // UIから URL取得
-                string url = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                // TODO ループ
+                for (; ; )
                 {
-                    // このコードブロックは UIスレッド。UIを更新できます
-                    var viewModel = this.DataContext as ClockViewModel;
-                    return viewModel.UrlText;
-                })).Result;
+                    // UIから URL取得
+                    // Example: https://golan.sakura.ne.jp/denryusen/dr2_tsec/kifufiles/dr2tsec+buoy_james8nakahi_dr2b3-11-bottom_43_dlshogi_xylty-60-2F+dlshogi+xylty+20210718131042.csa
+                    (string url, int intervalSeconds) = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                    {
+                        // このコードブロックは UIスレッド。UIを更新できます
+                        var viewModel = this.DataContext as ClockViewModel;
+                        return (viewModel.UrlText, viewModel.IntervalSeconds);
+                    })).Result;
 
-                // TODO CSAファイル読取
+                    // CSAファイル読取
+                    WebClient webClient = new WebClient();
+                    var csaText = webClient.DownloadString(url);
 
-                // 残り時間取得
+                    // TODO ファイル解析
 
-                // 時間のかかる処理
-                Thread.Sleep(3 * 1000);
+                    // すぐ終わる処理
+                    Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                    {
+                        // このコードブロックは UIスレッド。UIを更新できます
+                        var viewModel = this.DataContext as ClockViewModel;
+                        viewModel.FirstPlayerText = csaText;// url;// "a";
+                        viewModel.SecondPlayerText += "b";
+                    }));
 
-                // すぐ終わる処理
-                Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
-                {
-                    // このコードブロックは UIスレッド。UIを更新できます
-                    var viewModel = this.DataContext as ClockViewModel;
-                    viewModel.FirstPlayerText = url;// "a";
-                    viewModel.SecondPlayerText += "b";
-                }));
+                    // 更新間隔（秒）
+                    Thread.Sleep(intervalSeconds * 1000);
+                }
             }
-
-            //this.Dispatcher.Invoke((Action)(() =>
-            //{
-            //    this.FirstPlayerText = "Good bye!";
-            //}));
+            catch (TaskCanceledException)
+            {
+                // 単に終了します
+            }
         }
-
     }
 }

@@ -13,6 +13,8 @@
         <Button x:Name="monitoringButton" Content="監視" HorizontalAlignment="Left" Margin="103,45,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
         <Label Content="URL（.csa）" HorizontalAlignment="Left" Height="30" Margin="10,10,0,0" VerticalAlignment="Top" Width="75"/>
         <TextBox x:Name="urlTextBox" HorizontalAlignment="Left" Height="30" Margin="103,10,0,0" TextWrapping="Wrap" Text="{Binding UrlText}" VerticalAlignment="Top" Width="687"/>
+        <Label Content="更新間隔（秒）" HorizontalAlignment="Left" Margin="215,45,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="intervalSeconds" HorizontalAlignment="Left" Height="26" Margin="314,45,0,0" TextWrapping="Wrap" Text="{Binding IntervalSeconds}" VerticalAlignment="Top" Width="46" TextAlignment="Right"/>
 
     </Grid>
 
