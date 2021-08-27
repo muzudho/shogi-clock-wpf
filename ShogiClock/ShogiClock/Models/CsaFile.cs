@@ -145,9 +145,9 @@ namespace ShogiClock.Models
         /// <param name="tournament">大会。電竜戦は "denryu-sen", floodgateは "floodgate"</param>
         /// <param name="csaUrl">CSA形式の棋譜ファイルを指すURL</param>
         /// <returns></returns>
-        public static CsaFile Load(string tournament, string csaUrl)
+        public static bool Load(string tournament, string csaUrl, out CsaFile csaFile)
         {
-            var csaFile = new CsaFile();
+            csaFile = new CsaFile();
             csaFile.Tournament = tournament;
             csaFile.Url = csaUrl;
 
@@ -161,7 +161,17 @@ namespace ShogiClock.Models
                 webClient.Encoding = Encoding.GetEncoding("EUC-JP");
                 newLine = "\n";
             }
-            var csaText = webClient.DownloadString(csaFile.Url);
+
+            string csaText;
+            try
+            {
+                csaText = webClient.DownloadString(csaFile.Url);
+            }
+            catch (ArgumentException)
+            {
+                // URLの形式が間違っているときなど。とりあえず読取は失敗
+                return false;
+            }
 
             int i = 0;
             foreach (var line in csaText.Split(new string[] { newLine }, StringSplitOptions.None))
@@ -279,7 +289,7 @@ namespace ShogiClock.Models
                 i++;
             }
 
-            return csaFile;
+            return true;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Net;
 using ShogiClock.Models;
+using System;
 
 namespace ShogiClock.UserControls
 {
@@ -15,29 +16,6 @@ namespace ShogiClock.UserControls
         public ClockUserControl()
         {
             InitializeComponent();
-        }
-
-        /// <summary>
-        /// 監視ボタン クリック時
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            // このコードブロックはUIスレッド。UIにアクセスできますが、処理は早く終わらなければいけません
-            var viewModel = this.DataContext as ClockViewModel;
-
-            // URLを取得
-            var url = this.urlTextBox.Text;
-
-            // ビューに表示
-            viewModel.FirstPlayerText = "先手WIP";
-            viewModel.SecondPlayerText = "後手WIP";
-
-            // ワーカースレッドを起動します
-            var start = new ThreadStart(MonitoringThread);
-            var thread = new Thread(start);
-            thread.Start();
         }
 
         /// <summary>
@@ -56,22 +34,54 @@ namespace ShogiClock.UserControls
                 // Example: https://golan.sakura.ne.jp/denryusen/dr2_tsec/kifufiles/dr2tsec+buoy_james8nakahi_dr2b3-11-bottom_43_dlshogi_xylty-60-2F+dlshogi+xylty+20210718131042.csa
                 (string url, string tournament, int intervalSeconds) = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
                 {
-                        // このコードブロックは UIスレッド。UIを更新できます
-                        var viewModel = this.DataContext as ClockViewModel;
+                    // このコードブロックは UIスレッド。UIを更新できます
+                    var viewModel = this.DataContext as ClockViewModel;
                     return (viewModel.UrlText, viewModel.Tournament.CurrentItem as string, viewModel.IntervalSeconds);
                 })).Result;
 
                 // CSAファイル読取
-                var csaFile = CsaFile.Load(tournament, url);
-
-                // すぐ終わる処理
-                Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                CsaFile csaFile;
+                if (CsaFile.Load(tournament, url, out csaFile))
                 {
+                    // 読込成功時
+                    // すぐ終わる処理
+                    bool finished = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                    {
                         // このコードブロックは UIスレッド。UIを更新できます
                         var viewModel = this.DataContext as ClockViewModel;
-                    viewModel.FirstPlayerText = $"{csaFile.RemainingTime[1] / 60}分{csaFile.RemainingTime[1] % 60}秒";
-                    viewModel.SecondPlayerText = $"{csaFile.RemainingTime[2] / 60}分{csaFile.RemainingTime[2] % 60}秒";
-                }));
+                        viewModel.FirstPlayerText = $"{csaFile.RemainingTime[1] / 60}分{csaFile.RemainingTime[1] % 60}秒";
+                        viewModel.SecondPlayerText = $"{csaFile.RemainingTime[2] / 60}分{csaFile.RemainingTime[2] % 60}秒";
+
+                        if (csaFile.EndTime != null)
+                        {
+                            viewModel.StatusText = DateTime.Now.ToString("対局終了。自動更新おわり (最終更新 yyyy/MM/dd HH:mm:ss)");
+                            this.monitorButton.IsEnabled = true;
+                            return true;
+                        }
+                        viewModel.StatusText = DateTime.Now.ToString("稼働中 (最終更新 yyyy/MM/dd HH:mm:ss)");
+                        return false;
+                    })).Result;
+                    if (finished)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    // 読込成功時
+                    // すぐ終わる処理
+                    Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                    {
+                        // このコードブロックは UIスレッド。UIを更新できます
+                        var viewModel = this.DataContext as ClockViewModel;
+                        viewModel.FirstPlayerText = $"先手----";
+                        viewModel.SecondPlayerText = $"後手----";
+                        viewModel.StatusText = DateTime.Now.ToString("棋譜を読み込めていません。自動更新おわり (最終更新 yyyy/MM/dd HH:mm:ss)");
+                        this.monitorButton.IsEnabled = true;
+                    })).Wait();
+                    break;
+                }
+
 
                 // 更新間隔（秒）
                 Thread.Sleep(intervalSeconds * 1000);
@@ -81,6 +91,31 @@ namespace ShogiClock.UserControls
             //{
             //    // 単に終了します
             //}
+        }
+
+        /// <summary>
+        /// 監視開始ボタン クリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MonitorButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            this.monitorButton.IsEnabled = false;
+
+            // このコードブロックはUIスレッド。UIにアクセスできますが、処理は早く終わらなければいけません
+            var viewModel = this.DataContext as ClockViewModel;
+
+            // URLを取得
+            var url = this.urlTextBox.Text;
+
+            // ビューをクリアー
+            viewModel.FirstPlayerText = "先手----";
+            viewModel.SecondPlayerText = "後手----";
+
+            // ワーカースレッドを起動します
+            var start = new ThreadStart(MonitoringThread);
+            var thread = new Thread(start);
+            thread.Start();
         }
     }
 }

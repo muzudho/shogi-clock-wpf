@@ -52,7 +52,7 @@ namespace ShogiClock.ViewModels
             }
         }
 
-        private int _intervalSeconds = 60;
+        private int _intervalSeconds = 15;
 
         /// <summary>
         /// 棋譜を読みに行く間隔（秒）
@@ -115,6 +115,28 @@ namespace ShogiClock.ViewModels
                 }
                 this._secondPlayerText = value;
                 RaisePropertyChanged("SecondPlayerText");
+            }
+        }
+
+        private string _statusText = string.Empty;
+
+        /// <summary>
+        /// 状況のテキスト
+        /// </summary>
+        public string StatusText
+        {
+            get
+            {
+                return this._statusText;
+            }
+            set
+            {
+                if (this._statusText == value)
+                {
+                    return;
+                }
+                this._statusText = value;
+                RaisePropertyChanged("StatusText");
             }
         }
     }
