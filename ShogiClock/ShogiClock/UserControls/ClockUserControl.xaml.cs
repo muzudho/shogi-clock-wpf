@@ -46,12 +46,22 @@ namespace ShogiClock.UserControls
         {
             // このコードブロックは ワーカー スレッド。UIにはアクセスできません
 
-            // TODO CSAファイル読取
-
             // TODO ループ
             // 時間のかかる処理
             for (; ; )
             {
+                // UIから URL取得
+                string url = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                {
+                    // このコードブロックは UIスレッド。UIを更新できます
+                    var viewModel = this.DataContext as ClockViewModel;
+                    return viewModel.UrlText;
+                })).Result;
+
+                // TODO CSAファイル読取
+
+                // 残り時間取得
+
                 // 時間のかかる処理
                 Thread.Sleep(3 * 1000);
 
@@ -60,7 +70,8 @@ namespace ShogiClock.UserControls
                 {
                     // このコードブロックは UIスレッド。UIを更新できます
                     var viewModel = this.DataContext as ClockViewModel;
-                    viewModel.FirstPlayerText += "a";
+                    viewModel.FirstPlayerText = url;// "a";
+                    viewModel.SecondPlayerText += "b";
                 }));
             }
 
