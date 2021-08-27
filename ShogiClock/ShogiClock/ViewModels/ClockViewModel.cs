@@ -1,6 +1,7 @@
 ﻿using Livet;
 using System;
 using System.Threading;
+using System.Windows.Data;
 using System.Windows.Threading;
 
 namespace ShogiClock.ViewModels
@@ -29,12 +30,12 @@ namespace ShogiClock.ViewModels
             }
         }
 
-        private string _tournament = "floodgate";
+        private CollectionView _tournament = new CollectionView(new string[]{"floodgate","denryu-sen"});
 
         /// <summary>
         /// 棋譜を読みに行く間隔（秒）
         /// </summary>
-        public string Tournament
+        public CollectionView Tournament
         {
             get
             {

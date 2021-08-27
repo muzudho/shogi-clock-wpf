@@ -16,9 +16,7 @@
         <Label Content="更新間隔（秒）" HorizontalAlignment="Left" Margin="391,47,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="intervalSeconds" HorizontalAlignment="Left" Height="26" Margin="490,47,0,0" TextWrapping="Wrap" Text="{Binding IntervalSeconds}" VerticalAlignment="Top" Width="46" TextAlignment="Right"/>
         <Label Content="大会" HorizontalAlignment="Left" Margin="193,47,0,0" VerticalAlignment="Top"/>
-        <ComboBox HorizontalAlignment="Left" Margin="232,47,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
-            <ComboBoxItem Content="floodgate"></ComboBoxItem>
-            <ComboBoxItem Content="denryu-sen"></ComboBoxItem>
+        <ComboBox ItemsSource="{Binding Tournament}" HorizontalAlignment="Left" Margin="232,47,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
         </ComboBox>
 
     </Grid>

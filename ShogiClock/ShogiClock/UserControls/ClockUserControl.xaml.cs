@@ -58,7 +58,7 @@ namespace ShogiClock.UserControls
                     {
                         // このコードブロックは UIスレッド。UIを更新できます
                         var viewModel = this.DataContext as ClockViewModel;
-                        return (viewModel.UrlText, viewModel.Tournament, viewModel.IntervalSeconds);
+                        return (viewModel.UrlText, viewModel.Tournament.CurrentItem as string, viewModel.IntervalSeconds);
                     })).Result;
 
                     // CSAファイル読取
