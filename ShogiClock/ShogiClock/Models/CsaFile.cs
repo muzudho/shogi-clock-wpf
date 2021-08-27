@@ -154,47 +154,43 @@ namespace ShogiClock.Models
             // 棋譜ファイル（CSA形式）を読む
             // CSAファイル読取
             WebClient webClient = new WebClient();
+            var newLine = "\r\n";
+            // floodgateは EUC-JP
+            if (tournament == "floodgate")
+            {
+                webClient.Encoding = Encoding.GetEncoding("EUC-JP");
+                newLine = "\n";
+            }
             var csaText = webClient.DownloadString(csaFile.Url);
 
-            // floodgate用
-            if (tournament == "floodgate") {
-                // csa = f.read().decode("euc-jp")
-                //Encoding eucJp = Encoding.GetEncoding("EUC-JP");
-                //csaText.ToCharArray
-                //br = new System.IO.BinaryReader(sr);
-                //Array.Resize<Byte>(ref dat, (int)sr.Length);
-                //dat = br.ReadBytes((int)sr.Length);
-                //csaText = eucJp.GetString(csaText);
-            }
-            // 電竜戦、その他用 UTF-8
-
             int i = 0;
-            foreach(var line in csaText.Split(new string[] { "\r\n" }, StringSplitOptions.None))
+            foreach (var line in csaText.Split(new string[] { newLine }, StringSplitOptions.None))
             {
-                if(i == 0)
+                if (i == 0)
                 {
                     var result = CsaFile._reVersion.Match(line);
-                    if(result.Success)
+                    if (result.Success)
                     {
                         // OK, pass
                     }
                     else
                     {
                         // Error
-                        throw new Exception($"It\'s not a CSA file. Expected: \"V2\", etc. Found: {line}");
+                        throw new Exception($"It\'s not a CSA file. Expected: \"V2\", etc. Found: \"{line}\"");
                     }
                 }
 
                 var groups = CsaFile._rePhase.Matches(line);
-                if (0< groups.Count)
+                if (1 < groups.Count)
                 {
                     // print(f"Phase {result.group(1)}")
                     string sign = groups[1].Value;
-                    if(sign == "+")
+                    if (sign == "+")
                     {
                         csaFile.Phase = 1;
                         csaFile.IncrementalTime[1] += csaFile.Increment;
-                    }else if(sign == "-")
+                    }
+                    else if (sign == "-")
                     {
                         csaFile.Phase = 2;
                         csaFile.IncrementalTime[2] += csaFile.Increment;
@@ -208,16 +204,18 @@ namespace ShogiClock.Models
                 }
 
                 groups = CsaFile._reErapsed.Matches(line);
-                if (0 < groups.Count) {
+                if (1 < groups.Count)
+                {
                     // print(f"Erapsed {result.group(1)}")
                     csaFile.Erapsed[csaFile.Phase] += int.Parse(groups[1].Value);
                     continue;
                 }
 
-                if (tournament == "floodgate"){
+                if (tournament == "floodgate")
+                {
                     // floodgate用
                     groups = CsaFile._reFloodgateTimeLimit.Matches(line);
-                    if (0 < groups.Count)
+                    if (1 < groups.Count)
                     {
                         // print(f"TimeLimit Sec={result.group(1)}")
                         // 先手と後手の持ち時間は同じ
@@ -229,7 +227,7 @@ namespace ShogiClock.Models
                 {
                     // 電竜戦、その他用
                     groups = CsaFile._reDenryuSenTimeLimit.Matches(line);
-                    if (0 < groups.Count)
+                    if (1 < groups.Count)
                     {
                         // print(f"TimeLimit Sec={result.group(1)}")
                         // 先手と後手の持ち時間は同じ
@@ -239,7 +237,7 @@ namespace ShogiClock.Models
                 }
 
                 groups = CsaFile._reStartTime.Matches(line);
-                if (0 < groups.Count)
+                if (1 < groups.Count)
                 {
                     // print(f"StartTime [1]={result.group(1)} [2]={result.group(2)} [3]={result.group(3)} [4]={result.group(4)} [5]={result.group(5)} [6]={result.group(6)}")
                     csaFile.StartTime = new DateTime(
@@ -253,7 +251,7 @@ namespace ShogiClock.Models
                 }
 
                 groups = CsaFile._reEndTime.Matches(line);
-                if (0 < groups.Count)
+                if (1 < groups.Count)
                 {
                     // print(f"EndTime [1]={result.group(1)} [2]={result.group(2)} [3]={result.group(3)} [4]={result.group(4)} [5]={result.group(5)} [6]={result.group(6)}")
                     csaFile.EndTime = new DateTime(
@@ -267,7 +265,7 @@ namespace ShogiClock.Models
                 }
 
                 groups = CsaFile._reIncrement.Matches(line);
-                if (0 < groups.Count)
+                if (1 < groups.Count)
                 {
                     // print(f"Increment {result.group(1)}")
                     csaFile.Increment = int.Parse(groups[1].Value);

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Net;
+using ShogiClock.Models;
 
 namespace ShogiClock.UserControls
 {
@@ -53,26 +54,23 @@ namespace ShogiClock.UserControls
                 {
                     // UIから URL取得
                     // Example: https://golan.sakura.ne.jp/denryusen/dr2_tsec/kifufiles/dr2tsec+buoy_james8nakahi_dr2b3-11-bottom_43_dlshogi_xylty-60-2F+dlshogi+xylty+20210718131042.csa
-                    (string url, int intervalSeconds) = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
+                    (string url, string tournament, int intervalSeconds) = Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
                     {
                         // このコードブロックは UIスレッド。UIを更新できます
                         var viewModel = this.DataContext as ClockViewModel;
-                        return (viewModel.UrlText, viewModel.IntervalSeconds);
+                        return (viewModel.UrlText, viewModel.Tournament, viewModel.IntervalSeconds);
                     })).Result;
 
                     // CSAファイル読取
-                    WebClient webClient = new WebClient();
-                    var csaText = webClient.DownloadString(url);
-
-                    // TODO ファイル解析
+                    var csaFile = CsaFile.Load(tournament, url);
 
                     // すぐ終わる処理
                     Task.Run(() => this.firstPlayerLabel.Dispatcher.Invoke(() =>
                     {
                         // このコードブロックは UIスレッド。UIを更新できます
                         var viewModel = this.DataContext as ClockViewModel;
-                        viewModel.FirstPlayerText = csaText;// url;// "a";
-                        viewModel.SecondPlayerText += "b";
+                        viewModel.FirstPlayerText = $"{csaFile.RemainingTime[1] / 60}分{csaFile.RemainingTime[1] % 60}秒";
+                        viewModel.SecondPlayerText = $"{csaFile.RemainingTime[2] / 60}分{csaFile.RemainingTime[2] % 60}秒";
                     }));
 
                     // 更新間隔（秒）

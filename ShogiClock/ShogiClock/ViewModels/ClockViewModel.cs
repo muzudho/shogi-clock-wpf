@@ -29,6 +29,28 @@ namespace ShogiClock.ViewModels
             }
         }
 
+        private string _tournament = "floodgate";
+
+        /// <summary>
+        /// 棋譜を読みに行く間隔（秒）
+        /// </summary>
+        public string Tournament
+        {
+            get
+            {
+                return this._tournament;
+            }
+            set
+            {
+                if (this._tournament == value)
+                {
+                    return;
+                }
+                this._tournament = value;
+                RaisePropertyChanged("Tournament");
+            }
+        }
+
         private int _intervalSeconds = 60;
 
         /// <summary>
