@@ -1,8 +1,5 @@
 ﻿using Livet;
-using System;
-using System.Threading;
 using System.Windows.Data;
-using System.Windows.Threading;
 
 namespace ShogiClock.ViewModels
 {

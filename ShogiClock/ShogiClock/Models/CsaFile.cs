@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ShogiClock.Models
 {
@@ -218,7 +215,6 @@ namespace ShogiClock.Models
                 matched = CsaFile._reErapsed.Match(line);
                 if (matched.Success)
                 {
-                    // print(f"Erapsed {result.group(1)}")
                     csaFile.Erapsed[csaFile.Phase] += int.Parse(matched.Groups[1].Value);
                     continue;
                 }
@@ -241,7 +237,6 @@ namespace ShogiClock.Models
                     matched = CsaFile._reDenryuSenTimeLimit.Match(line);
                     if (matched.Success)
                     {
-                        // print(f"TimeLimit Sec={result.group(1)}")
                         // 先手と後手の持ち時間は同じ
                         var seconds = int.Parse(matched.Groups[1].Value);
                         csaFile.TimeLimit = new int[3] { 0, seconds, seconds };

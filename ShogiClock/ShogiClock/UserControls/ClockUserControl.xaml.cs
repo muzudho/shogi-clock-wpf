@@ -1,10 +1,9 @@
-﻿using ShogiClock.ViewModels;
+﻿using ShogiClock.Models;
+using ShogiClock.ViewModels;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Net;
-using ShogiClock.Models;
-using System;
 
 namespace ShogiClock.UserControls
 {
@@ -98,12 +97,10 @@ namespace ShogiClock.UserControls
             }
             catch(System.AggregateException)
             {
-                // TaskCanceledException
+                // 内部的には TaskCanceledException。
                 // ウィンドウを閉じたときなどに、タスクが中断してここを通ります。
                 // 単に終了します
             }
-
-            // Console.WriteLine("ワーカースレッド終了");
         }
 
         /// <summary>
