@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace ShogiClock.UserControls
+namespace ShogiClock.Views
 {
     /// <summary>
     /// ClockUserControl.xaml の相互作用ロジック

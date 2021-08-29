@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShogiClock"
-        xmlns:UserControls="clr-namespace:ShogiClock.UserControls" x:Class="ShogiClock.MainWindow"
+        xmlns:Views="clr-namespace:ShogiClock.Views"
+        x:Class="ShogiClock.MainWindow"
         mc:Ignorable="d"
         Title="将棋クロック" Height="450" Width="800">
     <Grid>
-        <UserControls:ClockUserControl Height="421" VerticalAlignment="Center" Width="793" Margin="0"/>
+        <Views:ClockUserControl Height="421" VerticalAlignment="Center" Width="793" Margin="0"/>
     </Grid>
 </Window>

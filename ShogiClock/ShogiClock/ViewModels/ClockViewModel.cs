@@ -1,5 +1,6 @@
 ﻿using Livet;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace ShogiClock.ViewModels
 {
@@ -27,7 +28,7 @@ namespace ShogiClock.ViewModels
             }
         }
 
-        private CollectionView _tournament = new CollectionView(new string[]{"floodgate","denryu-sen"});
+        private CollectionView _tournament = new CollectionView(new string[] { "floodgate", "denryu-sen" });
 
         /// <summary>
         /// 棋譜を読みに行く間隔（秒）
@@ -134,6 +135,19 @@ namespace ShogiClock.ViewModels
                 }
                 this._statusText = value;
                 RaisePropertyChanged("StatusText");
+            }
+        }
+
+        private ICommand _monitoring;
+
+        /// <summary>
+        /// 監視をするコマンド
+        /// </summary>
+        public ICommand Monitoring
+        {
+            get
+            {
+                return _monitoring ?? (_monitoring = new Monitoring());
             }
         }
     }
