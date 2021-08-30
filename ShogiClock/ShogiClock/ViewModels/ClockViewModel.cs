@@ -138,16 +138,16 @@ namespace ShogiClock.ViewModels
             }
         }
 
-        private ICommand _monitoring;
-
         /// <summary>
         /// 監視をするコマンド
         /// </summary>
-        public ICommand Monitoring
+        public MonitoringStart MonitoringStart { get; private set; } = new MonitoringStart();
+
+        public bool IsEnabledMonitoringStart
         {
             get
             {
-                return _monitoring ?? (_monitoring = new Monitoring());
+                return this.MonitoringStart.IsEnabled;
             }
         }
     }

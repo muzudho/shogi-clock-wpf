@@ -95,7 +95,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\ClockViewModel.cs" />
-    <Compile Include="ViewModels\Monitoring.cs" />
+    <Compile Include="ViewModels\MonitoringStart.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

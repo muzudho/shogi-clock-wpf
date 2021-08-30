@@ -6,26 +6,31 @@ namespace ShogiClock.ViewModels
     /// <summary>
     /// 棋譜を監視するコマンドです
     /// </summary>
-    public class Monitoring : ICommand
+    public class MonitoringStart : ICommand
     {
-        private bool _isBusy = false;
+        public MonitoringStart()
+        {
+
+        }
+
+        private bool _isEnabled = true;
 
         /// <summary>
         /// 忙しいか？ 忙しいと実行できません
         /// </summary>
-        public bool IsBusy
+        public bool IsEnabled
         {
             get
             {
-                return this._isBusy;
+                return this._isEnabled;
             }
             set
             {
-                if (this._isBusy == value)
+                if (this._isEnabled == value)
                 {
                     return;
                 }
-                this._isBusy = value;
+                this._isEnabled = value;
                 this.RaiseCanExecuteChanged();
             }
         }
@@ -37,7 +42,7 @@ namespace ShogiClock.ViewModels
         /// <returns></returns>
         public bool CanExecute(object parameter)
         {
-            return !this.IsBusy;
+            return this.IsEnabled;
         }
 
         /// <summary>
@@ -51,13 +56,38 @@ namespace ShogiClock.ViewModels
         /// <param name="parameter"></param>
         public void Execute(object parameter)
         {
-            if (this.IsBusy)
+            if (!this.IsEnabled)
             {
                 return;
             }
 
+            // 完璧な対策ではありませんが、実行できなくします。
+            this.IsEnabled = false;
+
             // TODO ここに処理を書く
             System.Windows.MessageBox.Show("hoge");
+
+            // View をどうやって取る？
+            /*
+            this.tournamentComboBox.IsEnabled = false;
+            this.monitorButton.IsEnabled = false;
+            this.intervalSeconds.IsEnabled = false;
+
+            // このコードブロックはUIスレッド。UIにアクセスできますが、処理は早く終わらなければいけません
+            var viewModel = this.DataContext as ClockViewModel;
+
+            // URLを取得
+            var url = this.urlTextBox.Text;
+
+            // ビューをクリアー
+            viewModel.FirstPlayerText = "先手----";
+            viewModel.SecondPlayerText = "後手----";
+
+            // ワーカースレッドを起動します
+            var start = new ThreadStart(MonitoringThread);
+            var thread = new Thread(start);
+            thread.Start();
+            */
         }
 
         /// <summary>
